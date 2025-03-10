@@ -3,3 +3,5 @@
 
  Ignore config.json
 *.json
+config.json
+.json
