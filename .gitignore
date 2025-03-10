@@ -2,4 +2,4 @@
 *.log
 
  Ignore config.json
-config.json
+Config.json
