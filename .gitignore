@@ -1,4 +1,3 @@
-*.log
-*.json
+
+#ignore config.json which contains specific environment information.
 config.json
-.json
