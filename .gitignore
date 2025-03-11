@@ -5,3 +5,6 @@ config.json
 #ignore the WinGet.RestSource code
 WinGet.RestSource-Winget.PowerShell.Source.zip
 WinGet.RestSource-Winget.PowerShell.Source/
+
+#ignore the parameters folder
+Parameters/
