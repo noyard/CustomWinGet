@@ -1,3 +1,7 @@
 
 #ignore config.json which contains specific environment information.
 config.json
+
+#ignore the WinGet.RestSource code
+WinGet.RestSource-Winget.PowerShell.Source.zip
+WinGet.RestSource-Winget.PowerShell.Source/
