@@ -35,8 +35,13 @@ if ($currentVersion -ne $latestVersion) {
     Write-Output "You are using the latest version of Azure CLI: $currentVersion"
 }
 
-az cloud set --name $AzureCloud
-connect-AzAccount -Environment $AzureCloud
-Set-AzContext -SubscriptionId $Subscription
+if(!($(get-azcontext).environment.name -eq $AzureCloud)) {
+    az cloud set --name $AzureCloud
+    connect-AzAccount -Environment $AzureCloud
+}
+
+if(!($(get-azcontext).Subscription.Id -eq $Subscription)) {
+    Set-AzContext -SubscriptionId $Subscription
+} 
 
 new-wingetsource -Name $Name -ResourceGroup $ResourceGroup -Region $Region -ImplementationPerformance $Implementationperformance -ShowConnectionInstructions -InformationAction Continue -Verbose

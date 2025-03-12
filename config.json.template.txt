@@ -4,5 +4,7 @@
   "Subscription": "12345678-1234-1234-1234-123456789abc",
   "ResourceGroup": "Winget",
   "Name": "Repo",
-  "ImplementationPerformance": "Basic"
+  "ImplementationPerformance": "Basic",
+  "StorageAccountName": "content",
+  "containerName": "winget-pkgs"
 }

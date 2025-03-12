@@ -1,0 +1,1 @@
+winget source add -n <source-name> -t <source-type> -a <source-url>
