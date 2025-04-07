@@ -8,3 +8,6 @@ WinGet.RestSource-Winget.PowerShell.Source/
 
 #ignore the parameters folder
 Parameters/
+
+#ignore the parameters folder
+Packages/
