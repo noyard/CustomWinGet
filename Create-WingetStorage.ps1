@@ -22,10 +22,8 @@ if ($currentVersion -ne $latestVersion) {
     Write-Output "You are using the latest version of Azure CLI: $currentVersion"
 }
 
-if(!($(get-azcontext).environment.name -eq $AzureCloud)) {
-    az cloud set --name $AzureCloud
-    connect-AzAccount -Environment $AzureCloud
-}
+az cloud set --name $AzureCloud
+Connect-AzAccount -Environment $AzureCloud
 
 if(!($(get-azcontext).Subscription.Id -eq $Subscription)) {
     Set-AzContext -SubscriptionId $Subscription
@@ -36,7 +34,7 @@ $StorageAccount = Get-AzStorageAccount -ResourceGroupName $resourcegroup -Name $
 if (!($StorageAccount))
 {  
     Write-Host "Creating Storage Account $($StorageAccountName)"
-    New-AzStorageAccount -ResourceGroupName $resourcegroup  -Name $StorageAccountName -Location $location -SkuName "Standard_LRS" 
+    New-AzStorageAccount -ResourceGroupName $resourcegroup  -Name $StorageAccountName -Location $region -SkuName "Standard_LRS" 
 }
 
 # Get the Storage Account Context
