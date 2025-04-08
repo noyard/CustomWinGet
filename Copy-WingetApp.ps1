@@ -34,23 +34,29 @@ function Upload-WingetMergedApp {
     $Version = $parsedData.PackageVersion  
     $PublisherFirst = $($Publisher.Substring(0, 1)).ToLower()
     $ManifestFolder = "./manifests/$($PublisherFirst)/$($publisher)/$($packageName)/$($Version)"
-    $DestPath="manifests/$($($parsedData.Author).Substring(0,1))/$($parsedData.Author)/$($parsedData.PackageName)/$($parsedData.PackageVersion)"
-
-    # Upload the folder to the container
+    
+  # Upload the folder to the container
     Get-ChildItem -Path $location -Recurse | ForEach-Object {
-        $filePath = $_.FullName
-        $blobName = $_.FullName.Substring($folderPath.Length + 1).Replace("\", "/")
+        $blobName = "$($ManifestFolder)\$($_.Name)"
         Write-Host "Uploading $blobName..."
         Set-AzStorageBlobContent -File $filePath -Container $containerName -Blob $blobName -Context $ctx
-    }
+    }  
   
     #Modify Yaml with new locations of storage files
     $TempYaml = New-TemporaryFile
-    $DestInstallerPath="$($ctx.BlobEndPoint)$($ContainerName)/$($DestPath)/$($InstallerFilename)"
-        (Get-Content $Yaml).Replace($InstallerUrl, $DestInstallerPath) | Set-Content $TempYaml
+    Copy-Item -path $Yaml -Destination $TempYaml
+    foreach ($installer in $parsedData.Installers)
+        {
+            $installerurlpath = $($installer.installerUrl) |Split-Path -Parent
+            $DestInstallerPath="$($ctx.BlobEndPoint)$($ContainerName)/$($ManifestFolder)"
+            if (!($installerurlpath -like $DestInstallerPath))
+                {
+                (Get-Content $TempYaml).Replace($InstallerUrl, $DestInstallerPath) | Set-Content $TempYaml
+                }
+        }
 
-        #upload Yaml file to the container
-        $blobName = "$($DestPath)\$($YamlFilename)"
-        Set-AzStorageBlobContent -File $TempYaml -Container $containerName -Blob $blobName -Context $ctx 	
+    #upload modified Yaml file to the container
+    $blobName = "$($ManifestFolder)/$($yaml | split-path -leaf)"
+    Set-AzStorageBlobContent -File $TempYaml -Container $containerName -Blob $blobName -Context $ctx 	
  
 }
