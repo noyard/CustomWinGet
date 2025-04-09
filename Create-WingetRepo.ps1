@@ -45,3 +45,15 @@ if(!($(get-azcontext).Subscription.Id -eq $Subscription)) {
 } 
 
 new-wingetsource -Name $Name -ResourceGroup $ResourceGroup -Region $Region -ImplementationPerformance $Implementationperformance -ShowConnectionInstructions -InformationAction Continue -Verbose
+
+# Get the API Management service context
+$apimContext = Get-AzApiManagement -ResourceGroupName $resourceGroupName -Name $apimServiceName
+
+if ($ConfigJson.WingetURL)
+    {
+        $ConfigJson.WingetURL = "$($apimContext.RuntimeUrl)/winget/"
+    }else{
+        $ConfigJson | Add-Member -Type NoteProperty -Name "WingetURL" -Value "$($apimContext.RuntimeUrl)/winget/" 
+    }
+$json = $ConfigJson | ConvertTo-Json -Depth 32  # Use -Depth if you have nested structures
+Set-Content -Path "$($folder)\config.json" -Value $json

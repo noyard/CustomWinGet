@@ -17,11 +17,11 @@ $parsedOutput = $WingetSourceOutput | ForEach-Object {
         Explicit = $fields[2]
     }
 }
-if ($parsedOutput.name -contains $name)
+if (!($parsedOutput.name -contains $name))
     {
-        "Winget Repository $($name) is already added." 
+        "Winget Repository $($name) is not a Winget Source" 
     }else{
-        winget source add -n "$($Name)" -t "Microsoft.Rest" -a $WingetURL
+        winget source remove -n "$($Name)" 
     }
 
 
