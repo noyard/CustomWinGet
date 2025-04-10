@@ -1,4 +1,4 @@
-function Upload-WingetMergedApp {
+function Copy-WingetMergedApp {
     param (
         [Parameter(Mandatory=$true)]
         [string]$yamlFolder
