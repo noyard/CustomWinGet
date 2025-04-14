@@ -51,12 +51,12 @@ function Copy-WingetMergedApp {
             $DestInstallerPath="$($ctx.BlobEndPoint)$($ContainerName)/$($ManifestFolder)"
             if (!($installerurlpath -like $DestInstallerPath))
                 {
-                (Get-Content $TempYaml).Replace($InstallerUrl, $DestInstallerPath) | Set-Content $TempYaml
+                (Get-Content $TempYaml).Replace($InstallerUrl, $DestInstallerPath) | Set-Content $Yaml
                 }
         }
 
     #upload modified Yaml file to the container
     $blobName = "$($ManifestFolder)/$($yaml | split-path -leaf)"
-    Set-AzStorageBlobContent -File $TempYaml -Container $containerName -Blob $blobName -Context $ctx 	
+    Set-AzStorageBlobContent -File $Yaml -Container $containerName -Blob $blobName -Context $ctx 	
  
 }
