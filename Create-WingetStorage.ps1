@@ -1,3 +1,5 @@
+$folder = "."
+
 # Read the Config.JSON file
 $ConfigJson = Get-Content -Path "$($folder)\config.json" -Raw | ConvertFrom-Json
 

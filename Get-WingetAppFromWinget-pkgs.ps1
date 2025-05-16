@@ -16,8 +16,11 @@ function Get-WingetAppFromWinget-pkgs {
         $location = New-TemporaryFile
         Invoke-WebRequest -Uri $DirUrl -OutFile $location
         $jsonData = Get-Content -Raw -Path $location | ConvertFrom-Json
-        $Version =$jsondata.name |Sort-Object -Descending | Select-Object -first 1
-    }
+        #take the version, exclude Skip Versions
+        $SkipVersions =@("Alpha","Beta","alpha","beta",".validation")
+        $Version =$jsondata.name | Where-Object {$SkipVersions -notcontains $_} | ForEach-Object { [System.Version]$_ } |Sort-Object -Descending | Select-Object -first 1
+        $Version = $Version.ToString()
+    }   
 
     $DirUrl = "https://api.github.com/repositories/197275551/contents/manifests/$($PublisherFirst)/$( $Publisher)/$($PackageName)/$($Version)"
     $location = New-TemporaryFile

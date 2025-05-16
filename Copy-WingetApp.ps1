@@ -4,6 +4,8 @@ function Copy-WingetMergedApp {
         [string]$yamlFolder
     )
     
+    $folder = "."
+
     # Read the Config.JSON file
     $ConfigJson = Get-Content -Path "$($folder)\config.json" -Raw | ConvertFrom-Json
 
@@ -18,10 +20,10 @@ function Copy-WingetMergedApp {
     # Read the YAML file
     if(test-path "$($yamlfolder)/*installer.yaml")
         {
-            $Yaml = (Get-ChildItem "$($location)/*installer.yaml").FullName
+            $Yaml = (Get-ChildItem "$($yamlfolder)/*installer.yaml").FullName
 
     }else{
-            $Yaml = (Get-ChildItem "$($location)/*.yaml").FullName
+            $Yaml = (Get-ChildItem "$($yamlfolder)/*.yaml").FullName
     }      
 
     $yamlContent = Get-Content -Path $Yaml -Raw
@@ -36,10 +38,17 @@ function Copy-WingetMergedApp {
     $ManifestFolder = "./manifests/$($PublisherFirst)/$($publisher)/$($packageName)/$($Version)"
     
   # Upload the folder to the container
-    Get-ChildItem -Path $location -Recurse | ForEach-Object {
+    Get-ChildItem -Path $yamlfolder -Recurse | ForEach-Object {
         $blobName = "$($ManifestFolder)\$($_.Name)"
-        Write-Host "Uploading $blobName..."
-        Set-AzStorageBlobContent -File $filePath -Container $containerName -Blob $blobName -Context $ctx
+        $filename = "$($_.FullName)"
+        try{
+            $blobInfo = Get-AzStorageBlob -Container $containerName -Blob $blobName -Context $ctx -ErrorAction Stop
+            # If it exists, do not upload 
+            Write-Output "$($blobName) already exists; skipping upload."
+        }catch{ 
+            Write-Host "Uploading $($blobName)..."
+            Set-AzStorageBlobContent -File $filename -Container $containerName -Blob $blobName -Context $ctx
+        }
     }  
   
     #Modify Yaml with new locations of storage files
@@ -48,15 +57,18 @@ function Copy-WingetMergedApp {
     foreach ($installer in $parsedData.Installers)
         {
             $installerurlpath = $($installer.installerUrl) |Split-Path -Parent
-            $DestInstallerPath="$($ctx.BlobEndPoint)$($ContainerName)/$($ManifestFolder)"
+            $installerurlpath  = $($installerurlpath.ToString()) -replace '\\', '/'
+            $DestInstallerPath = "$($ctx.BlobEndPoint)$($ContainerName)$($ManifestFolder -replace '^\.', '')"
+            $DestInstallerPath  = $($DestInstallerPath.ToString()) -replace '\\', '/'
             if (!($installerurlpath -like $DestInstallerPath))
                 {
-                (Get-Content $TempYaml).Replace($InstallerUrl, $DestInstallerPath) | Set-Content $Yaml
+                (Get-Content $TempYaml).Replace("$installerurlpath", "$DestInstallerPath") | Set-Content $Yaml
                 }
         }
 
     #upload modified Yaml file to the container
     $blobName = "$($ManifestFolder)/$($yaml | split-path -leaf)"
-    Set-AzStorageBlobContent -File $Yaml -Container $containerName -Blob $blobName -Context $ctx 	
+    Write-Host "Uploading $($blobName)..."
+    Set-AzStorageBlobContent -File $Yaml -Container $containerName -Blob $blobName -Context $ctx -Force	
  
 }
