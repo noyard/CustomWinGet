@@ -17,9 +17,8 @@ function Get-WingetAppFromWinget-pkgs {
         Invoke-WebRequest -Uri $DirUrl -OutFile $location
         $jsonData = Get-Content -Raw -Path $location | ConvertFrom-Json
         #take the version, exclude Skip Versions
-        $SkipVersions =@("Alpha","Beta","alpha","beta",".validation")
-        $Version =$jsondata.name | Where-Object {$SkipVersions -notcontains $_} | ForEach-Object { [System.Version]$_ } |Sort-Object -Descending | Select-Object -first 1
-        $Version = $Version.ToString()
+        $SkipVersions =@("Alpha","Beta","alpha","beta","Canary","CLI","Dev","Insiders","Preview",".validation")
+        $Version =$jsondata.name | Where-Object {$SkipVersions -notcontains $_} | Sort-Object { [System.Version]$_ }-Descending | Select-Object -first 1
     }   
 
     $DirUrl = "https://api.github.com/repositories/197275551/contents/manifests/$($PublisherFirst)/$( $Publisher)/$($PackageName)/$($Version)"
@@ -50,14 +49,18 @@ function Get-WingetAppFromWinget-pkgs {
         Foreach ($Installer in $parseddata.Installers)
             {
                 $DestinationFile = "$($ManifestFolder)\$($Installer.InstallerUrl | Split-Path -Leaf)"
-                "Downloading $DestinationFile"
-                If (!(Test-Path $DestinationFile)) {Invoke-WebRequest -Uri $Installer.InstallerUrl -OutFile $DestinationFile}
-                $calculatedHash = Get-FileHash -Path $DestinationFile -Algorithm SHA256
-                if ($calculatedHash.Hash -eq $Installer.InstallerSha256) {
-                    "The hash matches. The file integrity is verified."
-                 } else {
-                    "The hash does not match. The file may be corrupted."
-                 }
+                If (!(Test-Path "$($DestinationFile).SKIP")){
+                    If (!(Test-Path $DestinationFile)) {
+                        "Downloading $DestinationFile"
+                        Invoke-WebRequest -Uri $Installer.InstallerUrl -OutFile $DestinationFile
+                    }
+                    $calculatedHash = Get-FileHash -Path $DestinationFile -Algorithm SHA256
+                    if ($calculatedHash.Hash -eq $Installer.InstallerSha256) {
+                        "$($DestinationFile) hash matches. The file integrity is verified."
+                    } else {
+                        "$($DestinationFile) hash does not match. The file may be corrupted."
+                    }
+                }
             }
     }    
 }

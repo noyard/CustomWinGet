@@ -35,7 +35,7 @@ function Copy-WingetMergedApp {
     $packageName = $packageidentifier.split('.')[1]
     $Version = $parsedData.PackageVersion  
     $PublisherFirst = $($Publisher.Substring(0, 1)).ToLower()
-    $ManifestFolder = "./manifests/$($PublisherFirst)/$($publisher)/$($packageName)/$($Version)"
+    $ManifestFolder = "./manifests/$($PublisherFirst)/$($($parseddata.PackageIdentifier.ToString()) -replace '\.', '/')/$($Version)"
     
   # Upload the folder to the container
     Get-ChildItem -Path $yamlfolder -Recurse | ForEach-Object {
