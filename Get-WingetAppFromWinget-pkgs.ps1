@@ -1,13 +1,12 @@
 function Get-WingetAppFromWinget-pkgs {
     param (
         [Parameter(Mandatory=$true)]
-        [string]$Publisher,
-
-        [Parameter(Mandatory=$true)]
-        [string]$PackageName,
+        [string]$AppName,
 
         [string]$Version
     )
+    $Publisher = $appname -split "\." | Select-Object -First 1
+    $PackageName = ($appname -split "\.")[1..($appname.Length - 1)] -join "/"
     $PublisherFirst = $($Publisher.Substring(0, 1)).ToLower()
 
     If (!($version))
